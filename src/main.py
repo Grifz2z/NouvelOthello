@@ -1,5 +1,6 @@
 import flet as ft
 from othello import othello as oth
+from othello import ia 
 
 grille = ft.Column()
 coup_joue = ()
@@ -39,7 +40,7 @@ def main(page: ft.Page):
                     ))
                 elif oth.peut_jouer((x, y), joueur, g):
                     ligne.controls.append(ft.Container(
-                        content=ft.Column(controls=[ft.Text("🔹", size=20)], expand=True),
+                        content=ft.Column(controls=[ft.Text("NIGGA", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
                         bgcolor=ft.colors.GREEN_300,
@@ -57,10 +58,20 @@ def main(page: ft.Page):
 
         return table
 
+    
+
     def jeu_onclick(e, x : int, y: int):
-        global coup_joue
+        global coup_joue, joueur
         coup_joue = (x, y)
         jouer_coup()
+
+    def jouer_ia():
+        global grille, joueur, g
+        g = oth.jouer_coup(ia.meilleur_coup(joueur,g,3), joueur, g)
+        joueur = oth.autre(joueur)
+        grille = generate_grille(joueur, g)
+        page.controls[0] = grille
+        page.update()
 
     def jouer_coup():
         global grille, coup_joue, joueur, g
@@ -70,6 +81,7 @@ def main(page: ft.Page):
             grille = generate_grille(joueur, g)
             page.controls[0] = grille
             page.update()
+            jouer_ia()
 
     grille = generate_grille(joueur, g)
     page.add(grille)
