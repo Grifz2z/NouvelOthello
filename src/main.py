@@ -40,7 +40,7 @@ def main(page: ft.Page):
                     ))
                 elif oth.peut_jouer((x, y), joueur, g):
                     ligne.controls.append(ft.Container(
-                        content=ft.Column(controls=[ft.Text("NIGGA", size=20)], expand=True),
+                        content=ft.Column(controls=[ft.Text("🔹", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
                         bgcolor=ft.colors.GREEN_300,
