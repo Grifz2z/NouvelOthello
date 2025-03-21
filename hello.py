@@ -1,5 +1,6 @@
 def main():
-    print("Hello from nouvel-othello!")
+    z_1 = 7 + 2j
+    print(type(z_1))
 
 
 if __name__ == "__main__":

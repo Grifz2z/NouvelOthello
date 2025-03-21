@@ -16,13 +16,13 @@ def heuristique(joueur : int, g : ot.grille) -> float:
                             [5,-1,3,3,3,3,-1,5],]
     heuri = 0
     #print(f"Type de g dans heuristique: {type(g)}, Contenu: {g}")
-    #scores = ot.get_score(g) #? <-- pb ici, pk ?
-    #pions_diff = scores[joueur-1] - scores[ot.autre(joueur)-1]
+    scores = ot.get_score(g) #? <-- pb ici, pk ?
+    pions_diff = scores[joueur-1] - scores[ot.autre(joueur)-1]
     for i in range(8):
         for j in range(8):
             if g[i][j] == joueur:
                 heuri += grille_comparaison_[i][j]
-    return heuri**0.5 #+ pions_diff
+    return heuri**0.5 + pions_diff
         
 
 def grilles_possibles(joueur: int, g: ot.grille) -> list[tuple[ot.grille,ot.coup]]:
@@ -36,13 +36,10 @@ def grilles_possibles(joueur: int, g: ot.grille) -> list[tuple[ot.grille,ot.coup
 def meilleur_coup(joueur: int, g: ot.grille, depth : int)-> ot.coup:
     g_possibles = grilles_possibles(joueur=joueur, g=g)
     val_coups_par_minimax = [minimax(depth=depth-1, maximizingPlayer=joueur, g=g_possibles[x][0]) for x in range(len(g_possibles))]
-    #print(type(g_possibles[1][val_coups_par_minimax.index(max(val_coups_par_minimax))] if joueur-1 else g_possibles[1][val_coups_par_minimax.index(min(val_coups_par_minimax))]))
-
-    return g_possibles[1][val_coups_par_minimax.index(max(val_coups_par_minimax))] if joueur-1 else g_possibles[1][val_coups_par_minimax.index(min(val_coups_par_minimax))]
+    meilleur_index = val_coups_par_minimax.index(max(val_coups_par_minimax)) if joueur-1 else val_coups_par_minimax.index(min(val_coups_par_minimax))
+    return g_possibles[meilleur_index][1] 
 
 def minimax(depth : int, maximizingPlayer: int, g : ot.grille) -> float: #Blanc = 1 et Noir = 2
-        print(g)
-        print("----------------------------------")
         #L'algorithme MiniMax
         if depth == 0 or ot.is_game_over(g):
             return heuristique(maximizingPlayer, g)
@@ -59,4 +56,4 @@ def minimax(depth : int, maximizingPlayer: int, g : ot.grille) -> float: #Blanc 
                 evaluation = minimax(depth-1, ot.autre(maximizingPlayer), grille)
                 minEval = min(minEval, evaluation)
             return minEval
-        
+    

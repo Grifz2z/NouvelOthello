@@ -60,7 +60,6 @@ def coups_possibles(joueur: int, g: grille) -> tuple[coup,...]:
 def get_score(g: grille) -> tuple[int, int]:
     score_n = 0
     score_b = 0
-    print("#########################",g)
     for x in range(0,8):
         for y in range(0,8):
             if g[x][y] == 1:
