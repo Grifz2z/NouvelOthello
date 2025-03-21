@@ -25,7 +25,7 @@ def main(page: ft.Page):
                         content=ft.Column(controls=[ft.Text("⚪", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
-                        bgcolor=ft.colors.GREEN_300,
+                        bgcolor=ft.Colors.GREEN_300,
                         width=50,
                         height=50,
                     ))
@@ -34,7 +34,7 @@ def main(page: ft.Page):
                         content=ft.Column(controls=[ft.Text("⚫", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
-                        bgcolor=ft.colors.GREEN_300,
+                        bgcolor=ft.Colors.GREEN_300,
                         width=50,
                         height=50,
                     ))
@@ -43,7 +43,7 @@ def main(page: ft.Page):
                         content=ft.Column(controls=[ft.Text("🔹", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
-                        bgcolor=ft.colors.GREEN_300,
+                        bgcolor=ft.Colors.GREEN_300,
                         width=50,
                         height=50,
                         ink=True,
@@ -52,7 +52,7 @@ def main(page: ft.Page):
                 else:
                     ligne.controls.append(ft.Container(
                         width=50, height=50,
-                        bgcolor=ft.colors.GREEN_300,
+                        bgcolor=ft.Colors.GREEN_300,
                     ))
             table.controls.append(ligne)
 
