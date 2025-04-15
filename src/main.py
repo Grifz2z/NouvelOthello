@@ -14,6 +14,7 @@ def main(page: ft.Page):
     page.padding = 0
     page.spacing = 0
 
+
     def generate_grille(joueur: int, g: oth.grille) -> ft.Column:
         table = ft.Column(width=450, height=450, expand=True)
 
@@ -59,7 +60,6 @@ def main(page: ft.Page):
         return table
 
     
-
     def jeu_onclick(e, x : int, y: int):
         global coup_joue, joueur
         coup_joue = (x, y)
@@ -68,17 +68,36 @@ def main(page: ft.Page):
     def jouer_ia():
         global grille, joueur, g
         start = time.time()
-        g = oth.jouer_coup(ia.meilleur_coup(joueur,g,5), joueur, g)
-        print(f"Le temps de reflexion de l'ia est de : {time.time() - start}s")
-        joueur = oth.autre(joueur)
-        grille = generate_grille(joueur, g)
-        page.controls[0] = grille
-        page.update()
+        coup = ia.meilleur_coup(joueur,g,5)
+
+        if coup is None:  #l'IA n'a aucun coup possible
+            print(f"L'IA (joueur {joueur}) n'a aucun coup possible, on saute le tour.")
+            joueur = oth.autre(joueur)
+            grille = generate_grille(joueur, g)
+            page.controls[0] = grille
+            page.update()
+        else:
+            g = oth.jouer_coup(coup, joueur, g)
+            print(f"Le temps de reflexion de l'ia est de : {time.time() - start}s")
+            joueur = oth.autre(joueur)
+            grille = generate_grille(joueur, g)
+            page.controls[0] = grille
+            page.update()
 
     def jouer_coup():
         global grille, coup_joue, joueur, g
-        if coup_joue in oth.coups_possibles(joueur, g):
-            g = oth.jouer_coup(coup_joue, joueur, g)
+        coups_legaux = oth.coups_possibles(joueur, g)
+
+        if len(coups_legaux) == 0: #l'hum1 n'a aucun coup possible
+            print(f"Pas de coups possibles pour le joueur {joueur}, on saute le tour.")
+            joueur = oth.autre(joueur)
+            grille = generate_grille(joueur, g)
+            page.controls[0] = grille
+            page.update()
+            jouer_ia()
+
+        if coup_joue in coups_legaux:
+            g = oth.jouer_coup(coup_joue, joueur, g) # type: ignore
             joueur = oth.autre(joueur)
             grille = generate_grille(joueur, g)
             page.controls[0] = grille
