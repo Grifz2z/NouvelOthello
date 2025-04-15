@@ -47,7 +47,7 @@ def heuristique_mobilite(g: ot.grille, joueur: int) -> float:
         return 0.0
 
 
-def heuristique_corners(g: ot.grille, joueur: int) -> float:
+def heuristique_coins(g: ot.grille, joueur: int) -> float:
     """
     Heuristique des coins capturés.
     Seules les cases (0,0), (0,7), (7,0) et (7,7) sont considérées.
@@ -75,7 +75,7 @@ def heuristique_corners(g: ot.grille, joueur: int) -> float:
 
 
 
-def stable_positions(g: ot.grille) -> set[tuple[int, int]]:
+def postitions_stables(g: ot.grille) -> set[tuple[int, int]]:
     """
     Renvoie un ensemble de positions sur la grille que l'on peut considérer comme stables,
     en se contentant ici d'une analyse des bords (depuis chaque coin, on balaie la rangée ou
@@ -146,7 +146,7 @@ def heuristique_stabilite(g: ot.grille, joueur: int) -> float:
       100 * (Nombre de pions stables du joueur - Nombre de pions stables de l'adversaire)
           / (Nombre de pions stables du joueur + Nombre de pions stables de l'adversaire)
     """
-    places_stabilite = stable_positions(g)
+    places_stabilite = postitions_stables(g)
     stable_joueur = sum([1 for (i, j) in places_stabilite if g[i][j] == joueur])
     stable_adversaire = sum([1 for (i, j) in places_stabilite if g[i][j] == ot.autre(joueur)])
     

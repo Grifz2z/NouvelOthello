@@ -69,6 +69,8 @@ def main(page: ft.Page):
         global grille, joueur, g
         start = time.time()
         coup = ia.meilleur_coup(joueur,g,5)
+        coups_legaux = oth.coups_possibles(joueur, g)
+        print("Il y a ", len(coups_legaux), " coups possibles pour le joeur : ", joueur)
 
         if coup is None:  #l'IA n'a aucun coup possible
             print(f"L'IA (joueur {joueur}) n'a aucun coup possible, on saute le tour.")
@@ -87,6 +89,7 @@ def main(page: ft.Page):
     def jouer_coup():
         global grille, coup_joue, joueur, g
         coups_legaux = oth.coups_possibles(joueur, g)
+        print("Il y a ",len(coups_legaux), " coups possibles pour le joeur : ", joueur)
 
         if len(coups_legaux) == 0: #l'hum1 n'a aucun coup possible
             print(f"Pas de coups possibles pour le joueur {joueur}, on saute le tour.")

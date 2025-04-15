@@ -26,12 +26,12 @@ def heuristique(joueur : int, g : ot.grille) -> float:
     #        if g[i][j] == joueur:
     #            heuri += grille_comparaison_[i][j]
     #return heuri**0.5 + pions_diff
-    return heuristiques.heuristique_stabilite(g, joueur)
+    return heuristiques.heuristique_poids_statiques(g, joueur)
         
 
 def grilles_possibles(joueur: int, g: ot.grille) -> list[tuple[ot.grille,ot.coup]]:
     liste_grillecoup = []
-    
+
     for coup in ot.coups_possibles(joueur,g):
         nouvelle_grile = ot.jouer_coup(coup, joueur,g)
         liste_grillecoup.append((nouvelle_grile, coup))
