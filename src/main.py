@@ -1,7 +1,7 @@
 import flet as ft
 from othello import othello as oth
 from othello import ia 
-import time
+
 grille = ft.Column()
 coup_joue = ()
 joueur = 2
@@ -25,7 +25,7 @@ def main(page: ft.Page):
                         content=ft.Column(controls=[ft.Text("⚪", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
-                        bgcolor=ft.Colors.GREEN_300,
+                        bgcolor=ft.colors.GREEN_300,
                         width=50,
                         height=50,
                     ))
@@ -34,16 +34,16 @@ def main(page: ft.Page):
                         content=ft.Column(controls=[ft.Text("⚫", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
-                        bgcolor=ft.Colors.GREEN_300,
+                        bgcolor=ft.colors.GREEN_300,
                         width=50,
                         height=50,
                     ))
                 elif oth.peut_jouer((x, y), joueur, g):
                     ligne.controls.append(ft.Container(
-                        content=ft.Column(controls=[ft.Text("🔹", size=20)], expand=True),
+                        content=ft.Column(controls=[ft.Text("NIGGA", size=20)], expand=True),
                         padding=10,
                         alignment=ft.alignment.center,
-                        bgcolor=ft.Colors.GREEN_300,
+                        bgcolor=ft.colors.GREEN_300,
                         width=50,
                         height=50,
                         ink=True,
@@ -52,7 +52,7 @@ def main(page: ft.Page):
                 else:
                     ligne.controls.append(ft.Container(
                         width=50, height=50,
-                        bgcolor=ft.Colors.GREEN_300,
+                        bgcolor=ft.colors.GREEN_300,
                     ))
             table.controls.append(ligne)
 
@@ -67,9 +67,7 @@ def main(page: ft.Page):
 
     def jouer_ia():
         global grille, joueur, g
-        start = time.time()
-        g = oth.jouer_coup(ia.meilleur_coup(joueur,g,5), joueur, g)
-        print(f"Le temps de reflexion de l'ia est de : {time.time() - start}s")
+        g = oth.jouer_coup(ia.meilleur_coup(joueur,g,3), joueur, g)
         joueur = oth.autre(joueur)
         grille = generate_grille(joueur, g)
         page.controls[0] = grille
