@@ -3,7 +3,6 @@ use std::f32::INFINITY;
 
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
-use pyo3::types::PyList;
 
 pub type Grille = [[u8; 8]; 8];
 pub type Coup = (usize, usize);
@@ -320,8 +319,31 @@ fn heuristique_poids_statiques(g: Grille, joueur: u8)-> f32 {
 
 // ------------------------------------------------------------------------------ IA ----------------------------------------------------------------------------------------
 
-fn heuristique(joueur: u8, g: Grille) -> f32 {
-    return parite_jetons(g, joueur);
+fn heuristique_combinee(joueur: u8, g: Grille) -> f32 {
+    return parite_jetons(g, joueur) * 0.1
+    + heuristique_coins(g, joueur) *0.3 
+    + heuristique_mobilite(g, joueur) * 0.3
+    + heuristique_stabilite(&g, joueur) *0.3
+}
+
+fn heuristique(joueur: u8, g: Grille, type_heuristique : u8)-> f32 {
+    let score_b =  get_score_interne(g).0;
+    let score_n =  get_score_interne(g).1;
+
+    if is_game_over_interne(g) && score_b.max(score_n) == joueur {
+        return 100.0;
+    } else if is_game_over_interne(g) && score_b.max(score_n) != joueur {
+        return -100.0;
+    }
+    match type_heuristique {
+        0 => return parite_jetons(g, joueur),
+        1 => return heuristique_mobilite(g, joueur),
+        2 => return heuristique_coins(g, joueur),
+        3 => return heuristique_stabilite(&g, joueur),
+        4 => return heuristique_poids_statiques(g, joueur),
+        5 => return heuristique_combinee(joueur, g),
+        _ => 0.0
+    }
 }
 
 fn grilles_possibles(joueur: u8, g:Grille)-> Vec<(Grille,Coup)> {
@@ -335,14 +357,14 @@ fn grilles_possibles(joueur: u8, g:Grille)-> Vec<(Grille,Coup)> {
     return liste_grillecoup;
 }
 
-fn minimax(depth : u8, maximizing_player: u8, g: Grille) -> f32 {
+fn minimax(depth : u8, maximizing_player: u8, g: Grille, type_heuristique: u8) -> f32 {
     if depth == 0 || is_game_over_interne(g) {
-        return heuristique(maximizing_player, g);
+        return heuristique(maximizing_player, g, type_heuristique);
     }
     else if maximizing_player == 2 {
         let mut max_eval = -INFINITY;
         for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
-            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille);
+            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille, type_heuristique);
             max_eval = max_eval.max( evaluation)
         };
         return max_eval;
@@ -350,7 +372,7 @@ fn minimax(depth : u8, maximizing_player: u8, g: Grille) -> f32 {
     else{
         let mut min_eval = INFINITY;
         for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
-            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille);
+            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille, type_heuristique);
             min_eval = min_eval.min(evaluation)
         };
         return min_eval;
@@ -379,12 +401,12 @@ fn minimax(depth : u8, maximizing_player: u8, g: Grille) -> f32 {
 //    }
 //}
 
-fn meilleur_coup_interne(joueur: u8, g: Grille, depth: u8) -> Coup {
+fn meilleur_coup_interne(joueur: u8, g: Grille, depth: u8, type_heuristique: u8) -> Coup {
     let mut best_score = -INFINITY;
     let mut best_coup = (0, 0);
 
     for (grille, coup) in grilles_possibles(joueur, g) {
-        let score = minimax(depth - 1, autre_interne(joueur), grille);
+        let score = minimax(depth - 1, autre_interne(joueur), grille, type_heuristique);
         if score > best_score {
             best_score = score;
             best_coup = coup;
@@ -396,8 +418,8 @@ fn meilleur_coup_interne(joueur: u8, g: Grille, depth: u8) -> Coup {
 
 
 #[pyfunction]
-fn meilleur_coup(joueur: u8, g: Grille, depth: u8) -> PyResult<Coup> {
-    return Ok(meilleur_coup_interne(joueur, g, depth));
+fn meilleur_coup(joueur: u8, g: Grille, depth: u8, type_heuristique : u8) -> PyResult<Coup> {
+    return Ok(meilleur_coup_interne(joueur, g, depth, type_heuristique));
 }
 
 #[pymodule]

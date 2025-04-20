@@ -1,6 +1,6 @@
 import flet as ft
 from othello import othello as oth
-from othello import ia 
+#from othello import ia 
 import time
 import othello_ia as super_ia
 
@@ -11,8 +11,8 @@ g = oth.creer_grille()
 
 def main(page: ft.Page):
     page.title = "Othello"
-    page.window_width = 400
-    page.window_height = 400
+    page.window_width = 400 # type: ignore
+    page.window_height = 400 # type: ignore
     page.padding = 0
     page.spacing = 0
 
@@ -70,42 +70,24 @@ def main(page: ft.Page):
     def jouer_ia():
         global grille, joueur, g
         start = time.time()
-        coup = super_ia.meilleur_coup(joueur,g,5)
-        coups_legaux = oth.coups_possibles(joueur, g)
-        print("Il y a ", len(coups_legaux), " coups possibles pour le joeur : ", joueur)
+        coup = super_ia.meilleur_coup(joueur,g,5,5)
 
-        if coup is None:  #l'IA n'a aucun coup possible
-            print(f"L'IA (joueur {joueur}) n'a aucun coup possible, on saute le tour.")
-            joueur = oth.autre(joueur)
-            grille = generate_grille(joueur, g)
-            page.controls[0] = grille
-            page.update()
-        else:
-            g = oth.jouer_coup(coup, joueur, g)
-            print(f"Le temps de reflexion de l'ia est de : {time.time() - start}s")
-            joueur = oth.autre(joueur)
-            grille = generate_grille(joueur, g)
-            page.controls[0] = grille
-            page.update()
+        g = super_ia.jouer_coup(coup, joueur, g)
+        print(f"Le temps de reflexion de l'ia est de : {time.time() - start}s")
+        joueur = super_ia.autre(joueur)
+        grille = generate_grille(joueur, g)
+        page.controls[0] = grille # type: ignore
+        page.update()
 
     def jouer_coup():
         global grille, coup_joue, joueur, g
-        coups_legaux = oth.coups_possibles(joueur, g)
-        print("Il y a ",len(coups_legaux), " coups possibles pour le joeur : ", joueur)
-
-        if len(coups_legaux) == 0: #l'hum1 n'a aucun coup possible
-            print(f"Pas de coups possibles pour le joueur {joueur}, on saute le tour.")
-            joueur = oth.autre(joueur)
-            grille = generate_grille(joueur, g)
-            page.controls[0] = grille
-            page.update()
-            jouer_ia()
+        coups_legaux = super_ia.coups_possibles(joueur, g)
 
         if coup_joue in coups_legaux:
-            g = oth.jouer_coup(coup_joue, joueur, g) # type: ignore
-            joueur = oth.autre(joueur)
+            g = super_ia.jouer_coup(coup_joue, joueur, g) # type: ignore
+            joueur = super_ia.autre(joueur)
             grille = generate_grille(joueur, g)
-            page.controls[0] = grille
+            page.controls[0] = grille # type: ignore
             page.update()
             jouer_ia()
 
@@ -113,4 +95,4 @@ def main(page: ft.Page):
     page.add(grille)
     page.update()
 
-ft.app(target=main, view=ft.AppView.WEB_BROWSER)
+ft.app(target=main)
