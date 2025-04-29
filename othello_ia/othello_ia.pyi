@@ -32,3 +32,4 @@ def meilleur_coup(joueur: int, g: Grille, depth: int, type_heuristique: int) -> 
         Coup: Un tuple représentant les coordonnées du meilleur coup calculé.
     """
     ...
+    

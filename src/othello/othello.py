@@ -105,11 +105,11 @@ def show(joueur: int, g: grille):
         print(f"{i}│", end="")
         for j in range(8):
             if g[i][j]==NOIR:
-                print(" ○ ", end="│")
+                print("⚫", end="│")
             elif g[i][j]==BLANC:
-                print(" ● ", end="│")
+                print("⚪", end="│")
             elif peut_jouer((i,j), joueur, g):
-                print(" . ", end="│")
+                print("🔸", end="│")
             else:
                 print("   ", end="│")
         print()

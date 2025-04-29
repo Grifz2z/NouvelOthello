@@ -1,21 +1,37 @@
 import flet as ft
 from othello import othello as oth
-#from othello import ia 
+from othello import ia 
 import time
 import othello_ia as super_ia
 
 grille = ft.Column()
 coup_joue = ()
 joueur = 2
-g = oth.creer_grille()
+
+type_joueur = 2
+
+g = super_ia.creer_grille()
 
 def main(page: ft.Page):
     page.title = "Othello"
     page.window_width = 400 # type: ignore
     page.window_height = 400 # type: ignore
     page.padding = 0
-    page.spacing = 0
+    page.spacing = 10
 
+
+    score_blanc, score_noir = super_ia.get_score(g)
+    scores_text = ft.Text(f"⚪ Joueur 1: {score_blanc} | ⚫ Joueur 2: {score_noir}", size=20)
+
+    def reinitialiser_partie():
+        global joueur, g
+        joueur = 2
+        g = super_ia.creer_grille()
+
+        grille = generate_grille(joueur, g)
+
+        page.controls[0].controls[1].controls[0].controls[0] = grille # type: ignore
+        page.update()
 
     def generate_grille(joueur: int, g: oth.grille) -> ft.Column:
         table = ft.Column(width=450, height=450, expand=True)
@@ -61,7 +77,47 @@ def main(page: ft.Page):
 
         return table
 
-    
+    grille = generate_grille(joueur, g)
+
+    bouton_reinitialiser = ft.ElevatedButton(
+        text="Redémarrer",
+        on_click=lambda e: reinitialiser_partie(),
+        bgcolor=ft.Colors.RED_500,
+        color=ft.Colors.WHITE,
+    )
+
+    layout = ft.Row(
+        controls=[
+            ft.Column(
+            ),
+            ft.Column(
+                controls=[
+                    ft.Row(
+                        controls = [grille]
+                    ),
+                    ft.Row(
+                        controls=[scores_text],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER
+                    ),
+                    ft.Row(
+                        controls=[bouton_reinitialiser],
+                        alignment=ft.MainAxisAlignment.CENTER,  
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER  
+                    ),
+
+                ]
+            ),
+            ft.Column(
+                controls = [
+
+                ]
+            )
+        ]
+    )
+
+    page.add(layout)    
+
     def jeu_onclick(e, x : int, y: int):
         global coup_joue, joueur
         coup_joue = (x, y)
@@ -70,29 +126,35 @@ def main(page: ft.Page):
     def jouer_ia():
         global grille, joueur, g
         start = time.time()
-        coup = super_ia.meilleur_coup(joueur,g,5,5)
+        coup = super_ia.meilleur_coup(joueur,g,8,5)
 
-        g = super_ia.jouer_coup(coup, joueur, g)
-        print(f"Le temps de reflexion de l'ia est de : {time.time() - start}s")
+        g = super_ia.jouer_coup(coup, joueur, g) # type: ignore
+        print(f"Le temps de reflexion de l'ia est de : {time.time() - start}")
         joueur = super_ia.autre(joueur)
         grille = generate_grille(joueur, g)
-        page.controls[0] = grille # type: ignore
+
+        score_blanc, score_noir = super_ia.get_score(g)
+        scores_text.value = f"⚪ Joueur 1: {score_blanc} | ⚫ Joueur 2: {score_noir}"
+        
+        nouvelle_grille = generate_grille(joueur, g)
+        page.controls[0].controls[1].controls[0].controls[0] = nouvelle_grille # type: ignore
         page.update()
+
 
     def jouer_coup():
         global grille, coup_joue, joueur, g
-        coups_legaux = super_ia.coups_possibles(joueur, g)
+        g = super_ia.jouer_coup(coup_joue, joueur, g) # type: ignore
+        joueur = super_ia.autre(joueur)
+        grille = generate_grille(joueur, g)
+        score_blanc, score_noir = super_ia.get_score(g)
+        scores_text.value = f"⚪ Joueur 1: {score_blanc} | ⚫ Joueur 2: {score_noir}"
+        
+        nouvelle_grille = generate_grille(joueur, g)
+        page.controls[0].controls[1].controls[0].controls[0] = nouvelle_grille # type: ignore
+        page.update()
+        
+        jouer_ia()
 
-        if coup_joue in coups_legaux:
-            g = super_ia.jouer_coup(coup_joue, joueur, g) # type: ignore
-            joueur = super_ia.autre(joueur)
-            grille = generate_grille(joueur, g)
-            page.controls[0] = grille # type: ignore
-            page.update()
-            jouer_ia()
-
-    grille = generate_grille(joueur, g)
-    page.add(grille)
     page.update()
 
 ft.app(target=main)

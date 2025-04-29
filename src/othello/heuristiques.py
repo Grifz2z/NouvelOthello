@@ -58,11 +58,7 @@ def heuristique_coins(g: ot.grille, joueur: int) -> float:
     valeur_coins_adversaire = 0
 
     for i,j in coins:
-        if (i,j) in ot.coups_possibles(joueur, g):
-            valeur_coins_joueur += 1
-        elif (i,j) in ot.coups_possibles(ot.autre(joueur), g):
-            valeur_coins_adversaire += 1
-        elif g[i][j] == joueur:
+        if g[i][j] == joueur:
             valeur_coins_joueur += 3
         elif g[i][j] == ot.autre(joueur):
             valeur_coins_adversaire += 3
