@@ -11,6 +11,9 @@ dependencies = [
   "flet-desktop>=0.26.0",
   "flet==0.26.0",
   "maturin>=1.8.3",
+  "seaborn>=0.13.2",
+  "tk>=0.1.0",
+  "tcl>=0.2",
 ]
 
 [tool.flet]

@@ -26,53 +26,57 @@ def heuristique(joueur : int, g : ot.grille) -> float:
     #        if g[i][j] == joueur:
     #            heuri += grille_comparaison_[i][j]
     #return heuri**0.5 + pions_diff
-    return heuristiques.parite_jeutons(g, joueur)*0.1 + heuristiques.heuristique_coins(g, joueur)*0.3 + heuristiques.heuristique_mobilite(g, joueur)*0.3 + heuristiques.heuristique_stabilite(g, joueur)*0.3
+    return heuristiques.heuristique_poids_statiques(g,joueur)
         
 
-def grilles_possibles(joueur: int, g: ot.grille) -> list[tuple[ot.grille,ot.coup]]:
+def grilles_possibles(joueur: int, g: ot.grille) -> list[tuple[ot.grille, ot.coup]]:
     liste_grillecoup = []
+    coups_jouables = ot.coups_possibles(joueur, g)
+    for coup in coups_jouables:
+        nouvelle_grille = ot.jouer_coup(coup, joueur, g)
+        liste_grillecoup.append((nouvelle_grille, coup))
 
-    for coup in ot.coups_possibles(joueur,g):
-        nouvelle_grile = ot.jouer_coup(coup, joueur,g)
-        liste_grillecoup.append((nouvelle_grile, coup))
-        
+    
+    if len(coups_jouables) == 0:
+        liste_grillecoup.append((g, (10, 10))) 
+
     return liste_grillecoup
 
 
-def meilleur_coup(joueur: int, g: ot.grille, depth : int)-> ot.coup | None:
+def meilleur_coup(joueur: int, g: ot.grille, depth: int, ia: int) -> ot.coup | None:
     g_possibles = grilles_possibles(joueur=joueur, g=g)
 
-    if len(g_possibles)==0:
+    if len(g_possibles) == 0:
         return None
 
     val_coups_par_minimax = [
-        minimax(depth=depth-1, maximizingPlayer=joueur, g=g_possibles[x][0]) for x in range(len(g_possibles))
+        minimax(depth=depth-1, maximizingPlayer=joueur, g=g_possibles[x][0], ia=ia) for x in range(len(g_possibles))
     ]
 
     meilleur_index = (
-        val_coups_par_minimax.index(max(val_coups_par_minimax)) 
-        if joueur-1 
+        val_coups_par_minimax.index(max(val_coups_par_minimax))
+        if joueur == 2
         else val_coups_par_minimax.index(min(val_coups_par_minimax))
     )
 
-    return g_possibles[meilleur_index][1] 
+    return g_possibles[meilleur_index][1]  
 
 
-def minimax(depth : int, maximizingPlayer: int, g : ot.grille) -> float: #Blanc = 1 et Noir = 2
+def minimax(depth : int, maximizingPlayer: int, g : ot.grille, ia : int) -> float: #Blanc = 1 et Noir = 2
         #L'algorithme MiniMax
         if depth == 0 or ot.is_game_over(g):
             return heuristique(maximizingPlayer, g)
         
-        if maximizingPlayer-1: # maximizing player == noir
+        if maximizingPlayer == ia: # maximizing player == ia
             maxEval = -inf
             for grille, coup in grilles_possibles(maximizingPlayer,g):
-                evaluation = minimax(depth-1, ot.autre(maximizingPlayer), grille)
+                evaluation = minimax(depth-1, ot.autre(maximizingPlayer), grille, ia)
                 maxEval = max(maxEval, evaluation)
             return maxEval
         else:
             minEval = +inf
             for grille, coup in grilles_possibles(maximizingPlayer,g):
-                evaluation = minimax(depth-1, ot.autre(maximizingPlayer), grille)
+                evaluation = minimax(depth-1, ot.autre(maximizingPlayer), grille, ia)
                 minEval = min(minEval, evaluation)
             return minEval
     

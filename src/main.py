@@ -120,39 +120,46 @@ def main(page: ft.Page):
 
     def jeu_onclick(e, x : int, y: int):
         global coup_joue, joueur
-        coup_joue = (x, y)
-        jouer_coup()
+        if joueur == 2:
+            coup_joue = (x, y)
+            jouer_coup()
 
     def jouer_ia():
         global grille, joueur, g
         start = time.time()
-        coup = super_ia.meilleur_coup(joueur,g,8,5)
+        coup = super_ia.meilleur_coup(joueur, g, 5, 1,4)
 
-        g = super_ia.jouer_coup(coup, joueur, g) # type: ignore
-        print(f"Le temps de reflexion de l'ia est de : {time.time() - start}")
+        if coup == (10, 10):  # L'IA passe son tour
+            print("L'IA passe son tour.")
+        else:
+            g = super_ia.jouer_coup(coup, joueur, g)  # type: ignore
+
+        print(f"Le temps de réflexion de l'IA est de : {time.time() - start}")
         joueur = super_ia.autre(joueur)
         grille = generate_grille(joueur, g)
 
         score_blanc, score_noir = super_ia.get_score(g)
         scores_text.value = f"⚪ Joueur 1: {score_blanc} | ⚫ Joueur 2: {score_noir}"
-        
+
         nouvelle_grille = generate_grille(joueur, g)
-        page.controls[0].controls[1].controls[0].controls[0] = nouvelle_grille # type: ignore
+        page.controls[0].controls[1].controls[0].controls[0] = nouvelle_grille  # type: ignore
         page.update()
 
 
     def jouer_coup():
         global grille, coup_joue, joueur, g
-        g = super_ia.jouer_coup(coup_joue, joueur, g) # type: ignore
-        joueur = super_ia.autre(joueur)
-        grille = generate_grille(joueur, g)
-        score_blanc, score_noir = super_ia.get_score(g)
-        scores_text.value = f"⚪ Joueur 1: {score_blanc} | ⚫ Joueur 2: {score_noir}"
-        
-        nouvelle_grille = generate_grille(joueur, g)
-        page.controls[0].controls[1].controls[0].controls[0] = nouvelle_grille # type: ignore
-        page.update()
-        
+        if super_ia.coups_possibles(joueur, g) !=0:
+            g = super_ia.jouer_coup(coup_joue, joueur, g) # type: ignore
+            joueur = super_ia.autre(joueur)
+            grille = generate_grille(joueur, g)
+            score_blanc, score_noir = super_ia.get_score(g)
+            scores_text.value = f"⚪ Joueur 1: {score_blanc} | ⚫ Joueur 2: {score_noir}"
+            
+            nouvelle_grille = generate_grille(joueur, g)
+            page.controls[0].controls[1].controls[0].controls[0] = nouvelle_grille # type: ignore
+            page.update()
+        else:
+            joueur = super_ia.autre(joueur)
         jouer_ia()
 
     page.update()

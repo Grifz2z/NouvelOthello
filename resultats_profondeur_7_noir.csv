@@ -1,0 +1,7 @@
+,AI 0,AI 1,AI 2,AI 3,AI 4,AI 5
+AI 0,/,V,V,V,V,V
+AI 1,D,/,V,D,V,V
+AI 2,D,D,/,D,V,V
+AI 3,D,V,D,/,V,V
+AI 4,D,D,D,D,/,D
+AI 5,D,D,D,D,D,/

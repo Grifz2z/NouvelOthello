@@ -11,7 +11,7 @@ def coups_possibles(joueur: int, g: Grille) -> List[Coup]: ...
 def get_score(g: Grille) -> Tuple[int, int]: ...
 def is_game_over(g: Grille) -> bool: ...
 def jouer_coup(c: Coup, joueur: int, g: Grille) -> Grille: ...
-def meilleur_coup(joueur: int, g: Grille, depth: int, type_heuristique: int) -> Coup:
+def meilleur_coup(joueur: int, g: Grille, depth: int, type_heuristique: int, ia: int) -> Coup:
     """
     Calcule le meilleur coup pour un joueur donné en utilisant un algorithme avec une profondeur et une heuristique spécifiées.
 
@@ -27,6 +27,7 @@ def meilleur_coup(joueur: int, g: Grille, depth: int, type_heuristique: int) -> 
             - 4 : Tableau avec poids.
             - 5 : Combinaison des 4 premières.
             - Autre : Aucune heuristique.
+        ia (int) : la couleur de l'ia
 
     Returns:
         Coup: Un tuple représentant les coordonnées du meilleur coup calculé.

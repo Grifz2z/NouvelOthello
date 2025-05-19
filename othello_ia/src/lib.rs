@@ -87,6 +87,7 @@ fn coups_possibles_interne(joueur: u8, g:Grille)-> Vec<Coup> {
             }
         }
     }
+
     return coups;
 }
 
@@ -164,24 +165,20 @@ fn jouer_coup(c: Coup, joueur: u8, g:Grille)-> PyResult<Grille> {
 
 fn parite_jetons(g: Grille, joueur: u8) -> f32 {
     let (score_noir, score_blanc) = get_score_interne(g);
-    let mut score_joueur: f32 = 0.0;
-    if joueur == 1{
-        score_joueur = score_blanc as f32
-    } else if joueur == 2 {
-        score_joueur = score_noir as f32
+    if joueur == 1 {
+        return score_blanc as f32
+    } else {
+        return score_noir as f32
     }
-    score_joueur
 }
 
 fn heuristique_mobilite(g: Grille, joueur: u8) -> f32 {
-    let nb_coups_joueur: f32 = coups_possibles_interne(joueur, g).len() as f32;
-    return nb_coups_joueur as f32;
+    return coups_possibles_interne(joueur, g).len() as f32
 }
 
-fn heuristique_coins(g: Grille , joueur: u8) -> f32 {
+fn heuristique_coins(g: Grille, joueur: u8) -> f32 {
     let corners = [(0, 0), (0, 7), (7, 0), (7, 7)];
-    let mut coins_jou : f32 = 0.0;
-
+    let mut coins_jou = 0.0;
 
     for &(x, y) in &corners {
         if g[x][y] == joueur {
@@ -189,69 +186,135 @@ fn heuristique_coins(g: Grille , joueur: u8) -> f32 {
         }
     }
 
-    return coins_jou;
+    coins_jou
 }
+
+//fn positions_stables(g: &Grille) -> HashSet<(usize, usize)> {
+//    let mut stable = HashSet::new();
+//
+//    // Coin (0,0)
+//    if g[0][0] != 0 {
+//        let joueur = g[0][0];
+//        let mut j = 0;
+//        while j < 8 && g[0][j] == joueur {
+//            stable.insert((0, j));
+//            j += 1;
+//        }
+//        let mut i = 0;
+//        while i < 8 && g[i][0] == joueur {
+//            stable.insert((i, 0));
+//            i += 1;
+//        }
+//    }
+//
+//    // Coin (0,7)
+//    if g[0][7] != 0 {
+//        let joueur = g[0][7];
+//        let mut j = 7;
+//        while j > 0 && g[0][j] == joueur {
+//            stable.insert((0, j));
+//            j -= 1;
+//        }
+//        let mut i = 0;
+//        while i < 8 && g[i][7] == joueur {
+//            stable.insert((i, 7));
+//            i += 1;
+//        }
+//    }
+//
+//    // Coin (7,0)
+//    if g[7][0] != 0 {
+//        let joueur = g[7][0];
+//        let mut j = 0;
+//        while j < 8 && g[7][j] == joueur {
+//            stable.insert((7, j));
+//            j += 1;
+//        }
+//        let mut i = 7;
+//        while i > 0 && g[i][0] == joueur {
+//            stable.insert((i, 0));
+//            i -= 1;
+//        }
+//    }
+//
+//    // Coin (7,7)
+//    if g[7][7] != 0 {
+//        let joueur = g[7][7];
+//        let mut j = 7;
+//        while j > 0 && g[7][j] == joueur {
+//            stable.insert((7, j));
+//            j -= 1;
+//        }
+//        let mut i = 7;
+//        while i > 0 && g[i][7] == joueur {
+//            stable.insert((i, 7));
+//            i -= 1;
+//        }
+//    }
+//
+//    stable
+//}
+//
+//fn heuristique_stabilite(g: &Grille, joueur: u8) -> f32 {
+//    let stable_positions = positions_stables(g);
+//    stable_positions.iter().filter(|&&(i, j)| g[i][j] == joueur).count() as f32
+//}
 
 fn positions_stables(g: &Grille) -> HashSet<(usize, usize)> {
     let mut stable = HashSet::new();
+    let directions = [
+        (0_i32, 1), (1, 0), (0, -1), (-1, 0),
+        (1, 1), (1, -1), (-1, 1), (-1, -1)
+    ];
 
-    // Coin (0,0) en haut à gauche
-    if g[0][0] != 0 {
-        let joueur = g[0][0];
-        let mut j = 0;
-        while j < 8 && g[0][j] == joueur {
-            stable.insert((0, j));
-            j += 1;
-        }
-        let mut i = 0;
-        while i < 8 && g[i][0] == joueur {
-            stable.insert((i, 0));
-            i += 1;
+    // Étape 1 : coins pris sont stables
+    let coins = [(0,0), (0,7), (7,0), (7,7)];
+    for &(x, y) in &coins {
+        if g[x][y] != 0 {
+            stable.insert((x, y));
         }
     }
 
-    // Coin (0,7) en haut à droite
-    if g[0][7] != 0 {
-        let joueur = g[0][7];
-        let mut j = 7;
-        while j > 0 && g[0][j] == joueur {
-            stable.insert((0, j));
-            j -= 1;
-        }
-        let mut i = 0;
-        while i < 8 && g[i][7] == joueur {
-            stable.insert((i, 7));
-            i += 1;
-        }
-    }
+    // Étape 2 : Propagation des pions stables
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for i in 0..8 {
+            for j in 0..8 {
+                if g[i][j] != 0 && !stable.contains(&(i, j)) {
+                    let joueur = g[i][j];
+                    let mut stable_dans_toutes_directions = true;
 
-    // Coin (7,0) en bas à gauche
-    if g[7][0] != 0 {
-        let joueur = g[7][0];
-        let mut j = 0;
-        while j < 8 && g[7][j] == joueur {
-            stable.insert((7, j));
-            j += 1;
-        }
-        let mut i = 7;
-        while i > 0 && g[i][0] == joueur {
-            stable.insert((i, 0));
-            i -= 1;
-        }
-    }
+                    for &(dx, dy) in &directions {
+                        let mut x = i as i32;
+                        let mut y = j as i32;
 
-    // Coin (7,7) en bas à droite
-    if g[7][7] != 0 {
-        let joueur = g[7][7];
-        let mut j = 7;
-        while j > 0 && g[7][j] == joueur {
-            stable.insert((7, j));
-            j -= 1;
-        }
-        let mut i = 7;
-        while i > 0 && g[i][7] == joueur {
-            stable.insert((i, 7));
-            i -= 1;
+                        loop {
+                            x += dx;
+                            y += dy;
+
+                            if x < 0 || x >= 8 || y < 0 || y >= 8 {
+                                // bord => stable dans cette direction
+                                break;
+                            }
+
+                            if g[x as usize][y as usize] != joueur && !stable.contains(&(x as usize, y as usize)) {
+                                stable_dans_toutes_directions = false;
+                                break;
+                            }
+                        }
+
+                        if !stable_dans_toutes_directions {
+                            break;
+                        }
+                    }
+
+                    if stable_dans_toutes_directions {
+                        stable.insert((i, j));
+                        changed = true;
+                    }
+                }
+            }
         }
     }
 
@@ -259,10 +322,8 @@ fn positions_stables(g: &Grille) -> HashSet<(usize, usize)> {
 }
 
 fn heuristique_stabilite(g: &Grille, joueur: u8) -> f32 {
-    let places_stabilite = positions_stables(g);
-    let stable_joueur = places_stabilite.iter().filter(|&&(i, j)| g[i][j] == joueur).count();
-    //let stable_adversaire = places_stabilite.iter().filter(|&&(i, j)| g[i][j] == autre_interne(joueur)).count();
-    return stable_joueur as f32;
+    let stable_positions = positions_stables(g);
+    stable_positions.iter().filter(|&&(i, j)| g[i][j] == joueur).count() as f32
 }
 
 fn heuristique_poids_statiques(g: Grille, joueur: u8)-> f32 {
@@ -290,22 +351,27 @@ fn heuristique_poids_statiques(g: Grille, joueur: u8)-> f32 {
     return utilite_jou
 }
 
+fn heuristique_combinee(joueur: u8, g: Grille) -> f32 {
+    let parite = parite_jetons(g, joueur) / 64.0;
+    let coins = heuristique_coins(g, joueur) / 100.0;
+    let mobilite = heuristique_mobilite(g, joueur) / 32.0;
+    let stabilite = heuristique_stabilite(&g, joueur) / 64.0;
+
+    // pondération : 0.1 parité, 0.3 coins, 0.3 mobilité, 0.3 stabilité
+    0.1 * parite + 0.3 * coins + 0.3 * mobilite + 0.3 * stabilite
+}
+
 // ------------------------------------------------------------------------------ IA ----------------------------------------------------------------------------------------
 
-fn heuristique_combinee(joueur: u8, g: Grille) -> f32 {
-    return parite_jetons(g, joueur) * 0.1
-    + heuristique_coins(g, joueur) *0.3 
-    + heuristique_mobilite(g, joueur) * 0.3
-    + heuristique_stabilite(&g, joueur) *0.3
-}
 
 fn heuristique(joueur: u8, g: Grille, type_heuristique : u8)-> f32 {
     let score_b =  get_score_interne(g).0;
     let score_n =  get_score_interne(g).1;
+    let qui_a_plus_de_jeutons = if score_b > score_n { 1 } else if score_n > score_b { 2 } else { 0 };
 
-    if is_game_over_interne(g) && score_b.max(score_n) == joueur {
+    if is_game_over_interne(g) && qui_a_plus_de_jeutons == joueur {
         return 1000.0;
-    } else if is_game_over_interne(g) && score_b.max(score_n) != joueur {
+    } else if is_game_over_interne(g) && qui_a_plus_de_jeutons != joueur {
         return 0.0;
     }
     match type_heuristique {
@@ -319,27 +385,30 @@ fn heuristique(joueur: u8, g: Grille, type_heuristique : u8)-> f32 {
     }
 }
 
-fn grilles_possibles(joueur: u8, g:Grille)-> Vec<(Grille,Coup)> {
-    let mut liste_grillecoup: Vec<(Grille,Coup)> = Vec::new();
+fn grilles_possibles(joueur: u8, g: Grille) -> Vec<(Grille, Coup)> {
+    let mut liste_grillecoup: Vec<(Grille, Coup)> = Vec::new();
 
     for coup in coups_possibles_interne(joueur, g) {
         let new_grille = jouer_coup_interne(coup, joueur, g);
         liste_grillecoup.push((new_grille, coup));
-    };
+    }
 
-    return liste_grillecoup;
+    if liste_grillecoup.is_empty() {
+        liste_grillecoup.push((g, (10, 10)));
+    }
+
+    liste_grillecoup
 }
 
-fn minimax(depth : u8, maximizing_player: u8, g: Grille, type_heuristique: u8) -> f32 {
+
+fn minimax(depth : u8, maximizing_player: u8, g: Grille, type_heuristique: u8, ia : u8) -> f32 {
     if depth == 0 || is_game_over_interne(g) {
         return heuristique(maximizing_player, g, type_heuristique);
-    } else if coups_possibles_interne(maximizing_player, g).len() == 0 {
-        return minimax(depth-1, autre_interne(maximizing_player), g, type_heuristique);
     }
-    else if maximizing_player == 2 {
+    else if maximizing_player == ia {
         let mut max_eval = -INFINITY;
         for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
-            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille, type_heuristique);
+            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille, type_heuristique, ia);
             max_eval = max_eval.max( evaluation)
         };
         return max_eval;
@@ -347,59 +416,55 @@ fn minimax(depth : u8, maximizing_player: u8, g: Grille, type_heuristique: u8) -
     else{
         let mut min_eval = INFINITY;
         for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
-            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille, type_heuristique);
+            let evaluation = minimax(depth-1, autre_interne(maximizing_player), *grille, type_heuristique, ia);
             min_eval = min_eval.min(evaluation)
         };
         return min_eval;
     }
 }
 
-//fn alpha_beta(depth : u8, maximizing_player: u8, g: Grille, mut α : f32, mut β : f32, type_heuristique: u8) -> f32 {
-//    if depth == 0 || is_game_over_interne(g) {
-//        return heuristique(maximizing_player, g, type_heuristique);
-//    }
-//    else if maximizing_player == 2 {
-//        let mut max_eval = -INFINITY;
-//        for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
-//            let evaluation = alpha_beta(depth-1, autre_interne(maximizing_player), *grille, α, β, type_heuristique);
-//            max_eval = max_eval.max( evaluation);
-//            α = α.max(evaluation);
-//            if β <= α{
-//                break;
-//            }
-//        };
-//        return max_eval;
-//    }
-//    else{
-//        let mut min_eval = INFINITY;
-//        for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
-//            let evaluation = alpha_beta(depth-1, autre_interne(maximizing_player), *grille, α, β, type_heuristique);
-//            min_eval = min_eval.min(evaluation);
-//            β = β.min(evaluation);
-//            if β <= α{
-//                break;
-//            }
-//        };
-//        return min_eval;
-//    }
-//}
+fn alpha_beta(depth : u8, maximizing_player: u8, g: Grille, mut α : f32, mut β : f32, type_heuristique: u8, ia : u8) -> f32 {
+    if depth == 0 || is_game_over_interne(g) {
+        return heuristique(ia, g, type_heuristique);
+    }
+    else if maximizing_player == ia {
+        let mut max_eval = -INFINITY;
+        for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
+            let evaluation = alpha_beta(depth-1, autre_interne(maximizing_player), *grille, α, β, type_heuristique, ia);
+            max_eval = max_eval.max( evaluation);
+            α = α.max(evaluation);
+            if β <= α{
+                break;
+            }
+        };
+        return max_eval;
+    }
+    else{
+        let mut min_eval = INFINITY;
+        for (grille, _) in grilles_possibles(maximizing_player, g).iter() {
+            let evaluation = alpha_beta(depth-1, autre_interne(maximizing_player), *grille, α, β, type_heuristique, ia);
+            min_eval = min_eval.min(evaluation);
+            β = β.min(evaluation);
+            if β <= α{
+                break;
+            }
+        };
+        return min_eval;
+    }
+}
 
-fn meilleur_coup_interne(joueur: u8, g: Grille, depth: u8, type_heuristique: u8) -> Coup {
+fn meilleur_coup_interne(joueur: u8, g: Grille, depth: u8, type_heuristique: u8, ia : u8) -> Coup {
     let mut best_score = -INFINITY;
-    let mut best_coup = (0, 0);
+    let mut best_coup = (10, 10);
     let mut found_valid_coup = false;
 
     for (grille, coup) in grilles_possibles(joueur, g) {
-        let score = minimax(depth - 1, autre_interne(joueur), grille, type_heuristique);
-        if score > best_score {
+        let score = alpha_beta(depth - 1, autre_interne(joueur), grille, -INFINITY, INFINITY,type_heuristique, ia);
+        if score > best_score || !found_valid_coup {
             best_score = score;
             best_coup = coup;
             found_valid_coup = true;
         }
-    }
-
-    if !found_valid_coup {
-        return coups_possibles_interne(joueur, g).get(0).cloned().unwrap_or((0, 0));
     }
 
     best_coup
@@ -408,8 +473,8 @@ fn meilleur_coup_interne(joueur: u8, g: Grille, depth: u8, type_heuristique: u8)
 
 
 #[pyfunction]
-fn meilleur_coup(joueur: u8, g: Grille, depth: u8, type_heuristique : u8) -> PyResult<Coup> {
-    return Ok(meilleur_coup_interne(joueur, g, depth, type_heuristique));
+fn meilleur_coup(joueur: u8, g: Grille, depth: u8, type_heuristique : u8, ia : u8) -> PyResult<Coup> {
+    return Ok(meilleur_coup_interne(joueur, g, depth, type_heuristique, ia));
 }
 
 #[pymodule]
