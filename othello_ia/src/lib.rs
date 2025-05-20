@@ -263,7 +263,7 @@ fn heuristique_coins(g: Grille, joueur: u8) -> f32 {
 fn positions_stables(g: &Grille) -> HashSet<(usize, usize)> {
     let mut stable = HashSet::new();
     let directions = [
-        (0_i32, 1), (1, 0), (0, -1), (-1, 0),
+        (0, 1), (1, 0), (0, -1), (-1, 0),
         (1, 1), (1, -1), (-1, 1), (-1, -1)
     ];
 

@@ -51,7 +51,7 @@ def simuler_partie(heuristique_1: int, heuristique_2: int, profondeur: int = 5) 
                 coup = ia.meilleur_coup(joueur, g, profondeur, heuristique_2, 2)
             g = ia.jouer_coup(coup, joueur, g)
             n_coups += 1
-            print(f"Joueur {joueur} a joué {coup} en {time.time() - start:.2f}s")
+            #print(f"Joueur {joueur} a joué {coup} en {time.time() - start:.2f}s")
 
         joueur = ia.autre(joueur)
 
@@ -108,7 +108,7 @@ def combats_entre_heuristiques(profondeurs: list[int]):
                         maj_csv_resultat(path_blanc, blanc, noir, "N")
 
 
-combats_entre_heuristiques([5])
+combats_entre_heuristiques([3])
 
 
 
